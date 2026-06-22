@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Search, TrendingUp, Sparkles, ArrowRight } from "lucide-react";
 import Navbar from "@/components/navbar";
 import RecipeCard, { RecipeCardProps } from "@/components/recipe-card";
+import { createClient } from "@/lib/supabase/server";
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
 
@@ -136,10 +137,27 @@ const popularRecipes: RecipeCardProps[] = [
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createClient();
+  const { error } = await supabase.from("profiles").select("id").limit(1);
+  const connected = !error;
+
   return (
     <div className="min-h-screen bg-stone-50">
       <Navbar />
+
+      {/* ── Supabase connection test banner ──────────────────────── */}
+      <div
+        className={`px-4 py-2 text-center text-sm font-medium ${
+          connected
+            ? "bg-green-50 text-green-700"
+            : "bg-red-50 text-red-700"
+        }`}
+      >
+        {connected
+          ? "✓ Supabase connected successfully"
+          : `✗ Supabase connection failed: ${error?.message}`}
+      </div>
 
       <main>
         {/* ── Hero ──────────────────────────────────────────────────── */}
