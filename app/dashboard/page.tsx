@@ -20,6 +20,13 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  // Fetch the current user's own recipes
+  const { data: myRecipes } = await supabase
+    .from("recipes")
+    .select("id, title, description, category, difficulty, cooking_time, image_url, tags, created_at, user_id")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+
   // Fetch recipes from other users
   const { data: recipes } = await supabase
     .from("recipes")
@@ -59,6 +66,94 @@ export default async function DashboardPage() {
             Add Recipe
           </Link>
         </div>
+
+        {/* My Recipes */}
+        <section className="mb-12">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-stone-900">My Recipes</h2>
+            <Link
+              href="/recipes/new"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-orange-500 transition-colors hover:text-orange-600"
+            >
+              <ChefHat className="h-4 w-4" />
+              New recipe
+            </Link>
+          </div>
+
+          {!myRecipes || myRecipes.length === 0 ? (
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-stone-300 bg-white py-12 text-center">
+              <UtensilsCrossed className="mb-3 h-8 w-8 text-stone-300" />
+              <p className="font-semibold text-stone-600">No recipes yet</p>
+              <p className="mt-1 text-sm text-stone-400">Share your first creation!</p>
+              <Link
+                href="/recipes/new"
+                className="mt-4 rounded-full bg-orange-500 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-orange-600"
+              >
+                Add Recipe
+              </Link>
+            </div>
+          ) : (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {myRecipes.map((recipe) => (
+                <Link
+                  key={recipe.id}
+                  href={`/recipes/${recipe.id}`}
+                  className="group flex flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+                >
+                  <div className="relative h-44 w-full overflow-hidden bg-stone-100">
+                    {recipe.image_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={recipe.image_url}
+                        alt={recipe.title}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-orange-50 to-amber-100">
+                        <span className="text-5xl">🍽️</span>
+                      </div>
+                    )}
+                    <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-0.5 text-xs font-medium text-stone-700 backdrop-blur-sm">
+                      {recipe.category}
+                    </span>
+                  </div>
+                  <div className="flex flex-1 flex-col gap-2 p-4">
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="line-clamp-2 font-semibold leading-snug text-stone-900 group-hover:text-orange-500">
+                        {recipe.title}
+                      </h3>
+                      <span
+                        className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${difficultyStyle[recipe.difficulty]}`}
+                      >
+                        {recipe.difficulty.charAt(0).toUpperCase() + recipe.difficulty.slice(1)}
+                      </span>
+                    </div>
+                    {recipe.description && (
+                      <p className="line-clamp-2 text-sm text-stone-500">{recipe.description}</p>
+                    )}
+                    <div className="mt-auto flex items-center justify-between pt-3 text-xs text-stone-400">
+                      {recipe.cooking_time ? (
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3.5 w-3.5" />
+                          {recipe.cooking_time} min
+                        </span>
+                      ) : (
+                        <span />
+                      )}
+                      <span className="rounded-full bg-orange-50 px-2 py-0.5 text-orange-500 font-medium">
+                        Mine
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Community Recipes */}
+        <section>
+          <h2 className="mb-4 text-lg font-semibold text-stone-900">Community Recipes</h2>
 
         {/* Recipe grid */}
         {!recipes || recipes.length === 0 ? (
@@ -145,6 +240,7 @@ export default async function DashboardPage() {
             ))}
           </div>
         )}
+        </section>
       </main>
     </div>
   );
