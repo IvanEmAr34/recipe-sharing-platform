@@ -13,27 +13,34 @@ export type Database = {
         Row: {
           id: string;
           username: string;
+          email: string | null;
           full_name: string | null;
           avatar_url: string | null;
+          bio: string | null;
           created_at: string;
           updated_at: string;
         };
         Insert: {
           id: string;
           username: string;
+          email?: string | null;
           full_name?: string | null;
           avatar_url?: string | null;
+          bio?: string | null;
           created_at?: string;
           updated_at?: string;
         };
         Update: {
           id?: string;
           username?: string;
+          email?: string | null;
           full_name?: string | null;
           avatar_url?: string | null;
+          bio?: string | null;
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       recipes: {
         Row: {
@@ -84,6 +91,7 @@ export type Database = {
           updated_at?: string;
           deleted_at?: string | null;
         };
+        Relationships: [];
       };
       comments: {
         Row: {
@@ -107,6 +115,7 @@ export type Database = {
           content?: string;
           created_at?: string;
         };
+        Relationships: [];
       };
       ratings: {
         Row: {
@@ -130,6 +139,7 @@ export type Database = {
           rating?: number;
           created_at?: string;
         };
+        Relationships: [];
       };
       favorites: {
         Row: {
@@ -150,6 +160,7 @@ export type Database = {
           user_id?: string;
           created_at?: string;
         };
+        Relationships: [];
       };
     };
     Views: Record<string, never>;

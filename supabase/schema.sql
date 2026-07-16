@@ -18,6 +18,8 @@ create table public.profiles (
   username    text unique not null,
   full_name   text,
   avatar_url  text,
+  bio         text,
+  email       text,
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
 );
@@ -30,12 +32,13 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.profiles (id, username, full_name)
+  insert into public.profiles (id, username, full_name, email)
   values (
     new.id,
-    -- Use the part before @ in the email as a default username.
-    split_part(new.email, '@', 1),
-    coalesce(new.raw_user_meta_data->>'full_name', '')
+    -- Prefer username from metadata, fall back to the part before @ in email.
+    coalesce(nullif(trim(new.raw_user_meta_data->>'username'), ''), split_part(new.email, '@', 1)),
+    coalesce(new.raw_user_meta_data->>'full_name', ''),
+    coalesce(new.raw_user_meta_data->>'email', new.email, '')
   );
   return new;
 end;

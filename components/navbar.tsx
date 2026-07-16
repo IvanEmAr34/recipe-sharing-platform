@@ -9,6 +9,14 @@ export default async function Navbar() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const { data: profile } = user
+    ? await supabase
+        .from("profiles")
+        .select("username")
+        .eq("id", user.id)
+        .single()
+    : { data: null };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-stone-200 bg-white/90 backdrop-blur-sm">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -54,7 +62,7 @@ export default async function Navbar() {
                 href="/profile"
                 className="hidden text-sm font-medium text-stone-600 transition-colors hover:text-stone-900 sm:inline-flex"
               >
-                {user.email}
+                {profile?.username ?? user.email}
               </Link>
               <form action={logout}>
                 <button

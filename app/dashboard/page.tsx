@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { Clock, ChefHat, UtensilsCrossed } from "lucide-react";
 import Navbar from "@/components/navbar";
 import { createClient } from "@/lib/supabase/server";
-import { Profile, Recipe } from "@/lib/supabase/types";
+
 
 const difficultyStyle = {
   easy: "bg-green-100 text-green-700",
@@ -29,13 +29,13 @@ export default async function DashboardPage() {
     .limit(24);
 
   // Fetch author profiles for those recipes
-  const authorIds = [...new Set((recipes ?? []).map((r: Recipe) => r.user_id))];
+  const authorIds = [...new Set((recipes ?? []).map((r) => r.user_id))];
   const { data: profiles } = authorIds.length
     ? await supabase.from("profiles").select("id, username").in("id", authorIds)
     : { data: [] };
 
   const usernameMap = Object.fromEntries(
-    (profiles ?? []).map((p: Profile) => [p!.id, p!.username])
+    (profiles ?? []).map((p) => [p.id, p.username])
   );
 
   return (
@@ -77,7 +77,7 @@ export default async function DashboardPage() {
           </div>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {recipes.map((recipe: Recipe) => (
+            {recipes.map((recipe) => (
               <Link
                 key={recipe.id}
                 href={`/recipes/${recipe.id}`}
